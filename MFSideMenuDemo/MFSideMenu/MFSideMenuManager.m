@@ -5,6 +5,7 @@
 //
 
 #import "MFSideMenuManager.h"
+#import "CKSideMenuViewController.h"
 #import "UIViewController+MFSideMenu.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -43,59 +44,84 @@
     manager.sideMenuController = menuController;
     manager.menuSide = side;
     manager.options = options;
-    
-    [controller setMenuState:MFSideMenuStateHidden];
-    
-    if(controller.viewControllers && controller.viewControllers.count) {
-        // we need to do this b/c the options to show the barButtonItem
-        // weren't set yet when viewDidLoad of the topViewController was called
-        [controller.topViewController setupSideMenuBarButtonItem];
-    }
-    
-    UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc]
-                                          initWithTarget:manager action:@selector(navigationBarPanned:)];
-    [recognizer setMinimumNumberOfTouches:1];
+  
+  [MFSideMenuManager attachGeustures];
+}
+
++ (void)setupSideMenuManager {
+
+  UINavigationController *controller = [MFSideMenuManager sharedManager].navigationController;
+  UIViewController *menuController = [MFSideMenuManager sharedManager].sideMenuController;
+
+  if (!menuController) {
+    CKSideMenuViewController *sideMenuViewController = [[[CKSideMenuViewController alloc] initWithStyle:UITableViewStylePlain] autorelease];
+    [MFSideMenuManager configureWithNavigationController:(UINavigationController *)[[TTNavigator navigator] rootViewController] sideMenuController:sideMenuViewController];
+  } else if (controller && controller != [TTNavigator navigator].rootViewController) {
+    MFSideMenuManager *manager = [MFSideMenuManager sharedManager];
+    manager.navigationController = (UINavigationController *)[TTNavigator navigator].rootViewController;
+    [MFSideMenuManager attachGeustures];
+  }
+  
+}
+
++ (void)attachGeustures {
+  MFSideMenuManager *manager = [MFSideMenuManager sharedManager];
+  UINavigationController *controller = [MFSideMenuManager sharedManager].navigationController;
+  UIViewController *menuController = [MFSideMenuManager sharedManager].sideMenuController;
+  MenuSide side = [MFSideMenuManager sharedManager].menuSide;
+  NSLog(@"controller => %@, view => %@, navigationbar => %@", controller.debugDescription, controller.view.debugDescription, controller.navigationBar.debugDescription);
+  [controller setMenuState:MFSideMenuStateHidden];
+  
+  if(controller.viewControllers && controller.viewControllers.count) {
+    // we need to do this b/c the options to show the barButtonItem
+    // weren't set yet when viewDidLoad of the topViewController was called
+    [controller.topViewController setupSideMenuBarButtonItem];
+  }
+  
+  UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc]
+                                        initWithTarget:manager action:@selector(navigationBarPanned:)];
+  [recognizer setMinimumNumberOfTouches:1];
 	[recognizer setMaximumNumberOfTouches:1];
-    [recognizer setDelegate:manager];
-    [controller.navigationBar addGestureRecognizer:recognizer];
-    [recognizer release];
-    
-    recognizer = [[UIPanGestureRecognizer alloc]
-                  initWithTarget:manager action:@selector(navigationControllerPanned:)];
-    [recognizer setMinimumNumberOfTouches:1];
+  [recognizer setDelegate:manager];
+  [controller.navigationBar addGestureRecognizer:recognizer];
+  [recognizer release];
+  
+  recognizer = [[UIPanGestureRecognizer alloc]
+                initWithTarget:manager action:@selector(navigationControllerPanned:)];
+  [recognizer setMinimumNumberOfTouches:1];
 	[recognizer setMaximumNumberOfTouches:1];
-    [recognizer setDelegate:manager];
-    [controller.view addGestureRecognizer:recognizer];
-    [recognizer release];
-    
-    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
-                                             initWithTarget:manager action:@selector(navigationControllerTapped:)];
-    [tapRecognizer setDelegate:manager];
-    [controller.view addGestureRecognizer:tapRecognizer];
-    [tapRecognizer release];
-    
-    [controller.view.superview insertSubview:[menuController view] belowSubview:controller.view];
-    
-    [manager orientSideMenuFromStatusBar];
-    
+  [recognizer setDelegate:manager];
+  [controller.view addGestureRecognizer:recognizer];
+  [recognizer release];
+  
+  UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
+                                           initWithTarget:manager action:@selector(navigationControllerTapped:)];
+  [tapRecognizer setDelegate:manager];
+  [controller.view addGestureRecognizer:tapRecognizer];
+  [tapRecognizer release];
+  
+  [controller.view.superview insertSubview:[menuController view] belowSubview:controller.view];
+  
+  [manager orientSideMenuFromStatusBar];
+  
+  [[NSNotificationCenter defaultCenter] addObserver:manager
+                                           selector:@selector(flipViewAccordingToStatusBarOrientation:)
+                                               name:UIApplicationDidChangeStatusBarOrientationNotification
+                                             object:nil];
+  
+  if(side == MenuRightHandSide) {
+    // on the right hand side the shadowpath doesn't start at 0 so we have to redraw it when the device flips
     [[NSNotificationCenter defaultCenter] addObserver:manager
-                                             selector:@selector(flipViewAccordingToStatusBarOrientation:)
-                                                 name:UIApplicationDidChangeStatusBarOrientationNotification
+                                             selector:@selector(drawNavigationControllerShadowPath)
+                                                 name:UIDeviceOrientationDidChangeNotification
                                                object:nil];
-    
-    if(side == MenuRightHandSide) {
-        // on the right hand side the shadowpath doesn't start at 0 so we have to redraw it when the device flips
-        [[NSNotificationCenter defaultCenter] addObserver:manager
-                                                 selector:@selector(drawNavigationControllerShadowPath)
-                                                     name:UIDeviceOrientationDidChangeNotification
-                                                   object:nil];
-    }
-    
-    
-    [manager drawNavigationControllerShadowPath];
-    controller.view.layer.shadowOpacity = 0.75f;
-    controller.view.layer.shadowRadius = kMenuShadowWidth;
-    controller.view.layer.shadowColor = [UIColor blackColor].CGColor;
+  }
+  
+  
+  [manager drawNavigationControllerShadowPath];
+  controller.view.layer.shadowOpacity = 0.75f;
+  controller.view.layer.shadowRadius = kMenuShadowWidth;
+  controller.view.layer.shadowColor = [UIColor blackColor].CGColor;
 }
 
 + (CGFloat) menuVisibleNavigationControllerXPosition {

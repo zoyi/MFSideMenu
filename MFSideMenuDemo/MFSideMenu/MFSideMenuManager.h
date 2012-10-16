@@ -44,4 +44,7 @@ typedef enum {
 + (BOOL) menuButtonEnabled;
 + (BOOL) backButtonEnabled;
 
++ (void)setupSideMenuManager;
++ (void)attachGeustures;
+
 @end
