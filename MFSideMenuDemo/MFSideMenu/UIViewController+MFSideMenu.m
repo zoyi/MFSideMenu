@@ -8,6 +8,7 @@
 #import "MFSideMenuManager.h"
 #import <objc/runtime.h>
 #import <QuartzCore/QuartzCore.h>
+#import "UIBarButtonItem+CKAdditions.h"
 
 @class SideMenuViewController;
 
@@ -37,15 +38,22 @@ static char velocityKey;
 }
 
 - (UIBarButtonItem *)menuBarButtonItem {
-    return [[[UIBarButtonItem alloc]
-             initWithImage:[UIImage imageNamed:@"menu-icon.png"] style:UIBarButtonItemStyleBordered
-             target:self action:@selector(toggleSideMenuPressed:)] autorelease];
+  UIView *menuBarButtonBackgroundView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
+  menuBarButtonBackgroundView.backgroundColor = [UIColor clearColor];
+  UIButton *menuBarButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  [menuBarButton setImage:[UIImage imageNamed:@"menu-icon-gnb.png"] forState:UIControlStateNormal];
+  [menuBarButton addTarget:self action:@selector(toggleSideMenuPressed:) forControlEvents:UIControlEventTouchUpInside];
+  
+  CGSize imgSize = [[UIImage imageNamed:@"menu-icon-gnb.png"] size];
+  menuBarButton.frame = CGRectMake(10, 0, imgSize.width, imgSize.height);
+  [menuBarButtonBackgroundView addSubview:menuBarButton];
+  menuBarButtonBackgroundView.frame = CGRectMake(0, 0, CGRectGetMaxX(menuBarButton.frame), CGRectGetMaxY(menuBarButton.frame));
+  return [[[UIBarButtonItem alloc] initWithCustomView:menuBarButtonBackgroundView] autorelease];
+
 }
 
 - (UIBarButtonItem *)backBarButtonItem {
-    return [[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back-arrow"]
-                                             style:UIBarButtonItemStyleBordered target:self
-                                            action:@selector(backButtonPressed:)] autorelease];
+  return [UIBarButtonItem cookiStyleBackButtonItem];
 }
 
 - (void) setupSideMenuBarButtonItem {
@@ -142,7 +150,11 @@ static char velocityKey;
 
 - (void) toggleSideMenu:(BOOL)hidden animationDuration:(NSTimeInterval)duration {
     if(![self isKindOfClass:[UINavigationController class]]) return;
-    
+  
+  UINavigationController *controller = (UINavigationController *)self;
+  // disable user interaction on the current view controller is the menu is visible
+  controller.visibleViewController.view.userInteractionEnabled = hidden;
+  
     CGFloat x = [self xAdjustedForInterfaceOrientation:self.view.frame.origin];
     CGFloat navigationControllerXPosition = [MFSideMenuManager menuVisibleNavigationControllerXPosition];
     CGFloat animationPositionDelta = (hidden) ? x : (navigationControllerXPosition  - x);
