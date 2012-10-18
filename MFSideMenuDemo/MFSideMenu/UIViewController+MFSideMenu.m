@@ -61,6 +61,9 @@ static char velocityKey;
        && [MFSideMenuManager menuButtonEnabled]) {
         self.navigationItem.rightBarButtonItem = [self menuBarButtonItem];
         return;
+    } else {
+      // right bar button
+      self.navigationItem.rightBarButtonItem = [UIBarButtonItem cookiBadgeButtonItem];
     }
     
     if(self.navigationController.menuState == MFSideMenuStateVisible ||
