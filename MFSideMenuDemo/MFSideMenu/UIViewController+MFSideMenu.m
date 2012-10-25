@@ -38,18 +38,7 @@ static char velocityKey;
 }
 
 - (UIBarButtonItem *)menuBarButtonItem {
-  UIView *menuBarButtonBackgroundView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
-  menuBarButtonBackgroundView.backgroundColor = [UIColor clearColor];
-  UIButton *menuBarButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [menuBarButton setImage:[UIImage imageNamed:@"menu-icon-gnb.png"] forState:UIControlStateNormal];
-  [menuBarButton addTarget:self action:@selector(toggleSideMenuPressed:) forControlEvents:UIControlEventTouchUpInside];
-  
-  CGSize imgSize = [[UIImage imageNamed:@"menu-icon-gnb.png"] size];
-  menuBarButton.frame = CGRectMake(10, 0, imgSize.width, imgSize.height);
-  [menuBarButtonBackgroundView addSubview:menuBarButton];
-  menuBarButtonBackgroundView.frame = CGRectMake(0, 0, CGRectGetMaxX(menuBarButton.frame), CGRectGetMaxY(menuBarButton.frame));
-  return [[[UIBarButtonItem alloc] initWithCustomView:menuBarButtonBackgroundView] autorelease];
-
+  return [UIBarButtonItem cookiStyleMenuButtonItem];
 }
 
 - (UIBarButtonItem *)backBarButtonItem {
