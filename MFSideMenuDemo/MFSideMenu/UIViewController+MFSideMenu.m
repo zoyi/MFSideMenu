@@ -67,11 +67,13 @@ static char velocityKey;
     if(self.navigationController.menuState == MFSideMenuStateVisible ||
        [[self.navigationController.viewControllers objectAtIndex:0] isEqual:self]) {
         if([MFSideMenuManager menuButtonEnabled]) {
+          self.navigationItem.hidesBackButton = YES;
             self.navigationItem.leftBarButtonItem = [self menuBarButtonItem];
         }
     } else {
         if([MFSideMenuManager sharedManager].menuSide == MenuLeftHandSide) {
             if([MFSideMenuManager backButtonEnabled]) {
+              self.navigationItem.hidesBackButton = YES;
                 self.navigationItem.leftBarButtonItem = [self backBarButtonItem];
             }
         }
