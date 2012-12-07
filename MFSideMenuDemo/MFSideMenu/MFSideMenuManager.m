@@ -69,7 +69,7 @@
   UINavigationController *controller = [MFSideMenuManager sharedManager].navigationController;
   UIViewController *menuController = [MFSideMenuManager sharedManager].sideMenuController;
   MenuSide side = [MFSideMenuManager sharedManager].menuSide;
-  NSLog(@"controller => %@, view => %@, navigationbar => %@", controller.debugDescription, controller.view.debugDescription, controller.navigationBar.debugDescription);
+
   [controller setMenuState:MFSideMenuStateHidden];
   
   if(controller.viewControllers && controller.viewControllers.count) {
