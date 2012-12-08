@@ -150,29 +150,57 @@
 
 #pragma mark - UIGestureRecognizerDelegate
 
+//- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+//    return YES;
+//}
+//
+//- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+//    if([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] && 
+//       self.navigationController.menuState != MFSideMenuStateHidden) return YES;
+//    
+//    if([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
+//        if([gestureRecognizer.view isEqual:self.navigationController.view] && 
+//           self.navigationController.menuState != MFSideMenuStateHidden) return YES;
+//        
+//        if([gestureRecognizer.view isEqual:self.navigationController.navigationBar] && 
+//           self.navigationController.menuState == MFSideMenuStateHidden) return YES;
+//    }
+//    return NO;
+//}
+//
+//- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer 
+//    shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+//	return ![gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]];
+//}
+
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
-    return YES;
+  if ([touch.view isKindOfClass:[UIControl class]]) return NO;
+  
+  if([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] &&
+     self.navigationController.menuState != MFSideMenuStateHidden) return YES;
+  
+  if([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
+    // we don't want to override UITableViewCell swipes
+    if ([touch.view isKindOfClass:[UITableViewCell class]] ||
+        [touch.view.superview isKindOfClass:[UITableViewCell class]]) return NO;
+    
+    if([gestureRecognizer.view isEqual:self.navigationController.view]) return YES;
+    
+    if([gestureRecognizer.view isEqual:self.navigationController.navigationBar] &&
+       self.navigationController.menuState == MFSideMenuStateHidden) return YES;
+  }
+  
+  return NO;
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
-    if([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] && 
-       self.navigationController.menuState != MFSideMenuStateHidden) return YES;
-    
-    if([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
-        if([gestureRecognizer.view isEqual:self.navigationController.view] && 
-           self.navigationController.menuState != MFSideMenuStateHidden) return YES;
-        
-        if([gestureRecognizer.view isEqual:self.navigationController.navigationBar] && 
-           self.navigationController.menuState == MFSideMenuStateHidden) return YES;
-    }
-    return NO;
+  return YES;
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer 
-    shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-	return ![gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]];
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+	return NO;
 }
-
 - (void) navigationControllerTapped:(id)sender {
     if(self.navigationController.menuState != MFSideMenuStateHidden) {
         [self.navigationController setMenuState:MFSideMenuStateHidden];
@@ -333,7 +361,7 @@
 }
 
 - (void) navigationControllerPanned:(id)sender {
-    if(self.navigationController.menuState == MFSideMenuStateHidden) return;
+  //    if(self.navigationController.menuState != MFSideMenuStateHidden) return;
     
     [self handleNavigationBarPan:sender];
 }
