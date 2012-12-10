@@ -61,7 +61,11 @@ static char velocityKey;
         return;
     } else {
       // right bar button
-      self.navigationItem.rightBarButtonItem = [UIBarButtonItem cookiBadgeButtonItem];
+      if (!([self isKindOfClass:NSClassFromString(@"CKWebKitViewController")]
+            || [self isKindOfClass:NSClassFromString(@"CKWebController")])) {
+        self.navigationItem.rightBarButtonItem = [UIBarButtonItem cookiBadgeButtonItem];
+      }
+
     }
     
     if(self.navigationController.menuState == MFSideMenuStateVisible ||
